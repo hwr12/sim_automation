@@ -240,6 +240,12 @@ function Launch-Program {
         [string]$Arguments = "",
         [string]$WorkingDir = ""
     )
+    # Handle .lnk shortcut files — use Invoke-Item (shell open)
+    if ($Path -like "*.lnk") {
+        Write-Log "Launching shortcut: $Path"
+        Invoke-Item $Path
+        return $null
+    }
     $params = @{ FilePath = $Path; PassThru = $true }
     if ($Arguments -ne "")  { $params.ArgumentList    = $Arguments }
     if ($WorkingDir -ne "") { $params.WorkingDirectory = $WorkingDir }
@@ -276,7 +282,11 @@ function Run-Automation {
 
     # ---- Step 1: ImmersiveDisplayPRO ----
     Write-Log "--- Step 1: ImmersiveDisplayPRO ---"
-    Launch-Program -Path "C:\Users\Public\Desktop\ImmersiveDisplayPRO.lnk"
+    try {
+        Launch-Program -Path "C:\Users\Public\Desktop\ImmersiveDisplayPRO.lnk"
+    } catch {
+        Write-Log "Launch failed: $($_.Exception.Message)" "ERROR"
+    }
     $hwnd = Wait-ForWindow -Title "ImmersiveDisplayPRO" -TimeoutSeconds 30
     if ($hwnd -ne [IntPtr]::Zero) {
         Focus-Window -Handle $hwnd
