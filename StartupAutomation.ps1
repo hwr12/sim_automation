@@ -87,7 +87,15 @@ public class Win32 {
 # ============================================================
 
 # --- Logging ---
-$script:LogPath = "$PSScriptRoot\startup-log.txt"
+$script:LogDir   = "$PSScriptRoot\logs"
+$script:LogDate  = Get-Date -Format "yyyy-MM-dd"
+$script:LogPath  = "$script:LogDir\automation-$script:LogDate.log"
+$script:ErrorLog = "$script:LogDir\error-$script:LogDate.log"
+
+# Create logs directory if it doesn't exist
+if (-not (Test-Path $script:LogDir)) {
+    New-Item -ItemType Directory -Path $script:LogDir -Force | Out-Null
+}
 
 function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
@@ -102,6 +110,11 @@ function Write-Log {
         }
     )
     $line | Out-File -Append -FilePath $script:LogPath -Encoding UTF8
+
+    # Also write errors/warnings to the error log
+    if ($Level -in @("ERROR", "WARN")) {
+        $line | Out-File -Append -FilePath $script:ErrorLog -Encoding UTF8
+    }
 }
 
 # --- Wait for a window to appear by title (supports partial match) ---
@@ -301,10 +314,17 @@ function Run-Automation {
 # MAIN
 # ============================================================
 
-# Run the automation
-Run-Automation
+# Run the automation with global error handling
+try {
+    Run-Automation
+} catch {
+    Write-Log "UNCAUGHT EXCEPTION: $($_.Exception.Message)" "ERROR"
+    Write-Log "Stack trace: $($_.ScriptStackTrace)" "ERROR"
+}
 
-# Keep window open (remove this line if running as startup task)
+Write-Log "Logs saved to: $script:LogDir"
+
+# Keep window open so you can read the output
 Write-Host ""
 Write-Host "Press any key to close..." -ForegroundColor Gray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
