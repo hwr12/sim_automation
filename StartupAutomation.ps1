@@ -274,41 +274,15 @@ function Launch-Program {
 function Run-Automation {
     Write-Log "=== Automation sequence started ==="
 
-    # ---- EXAMPLE 1: Launch Notepad and type something ----
-    Write-Log "--- Step 1: Notepad ---"
-    Launch-Program -Path "notepad.exe"
-    $hwnd = Wait-ForWindow -Title "Notepad" -TimeoutSeconds 10
+    # ---- Step 1: ImmersiveDisplayPRO ----
+    Write-Log "--- Step 1: ImmersiveDisplayPRO ---"
+    Launch-Program -Path "C:\Users\Public\Desktop\ImmersiveDisplayPRO.lnk"
+    $hwnd = Wait-ForWindow -Title "ImmersiveDisplayPRO" -TimeoutSeconds 30
     if ($hwnd -ne [IntPtr]::Zero) {
         Focus-Window -Handle $hwnd
-        Send-Text -Text "Hello from automation!"
-        Start-Sleep -Seconds 1
+        Start-Sleep -Seconds 2
+        # TODO: Add button clicks or interactions here
     }
-
-    # ---- EXAMPLE 2: Launch Calculator ----
-    Write-Log "--- Step 2: Calculator ---"
-    Launch-Program -Path "calc.exe"
-    Start-Sleep -Seconds 2
-
-    # ---- EXAMPLE 3: Launch a program and click a button ----
-    # Uncomment and customize:
-    # Write-Log "--- Step 3: My Sim Tool ---"
-    # Launch-Program -Path "C:\Path\To\MySimTool.exe"
-    # $hwnd = Wait-ForWindow -Title "My Simulation" -TimeoutSeconds 30
-    # if ($hwnd -ne [IntPtr]::Zero) {
-    #     Focus-Window -Handle $hwnd
-    #     Start-Sleep -Seconds 2
-    #
-    #     # Option A: Click a named button
-    #     Click-Button -WindowHandle $hwnd -ButtonText "Start"
-    #
-    #     # Option B: Click by coordinates relative to window
-    #     # Click-RelativeTo -WindowHandle $hwnd -OffsetX 350 -OffsetY 200
-    #
-    #     # Option C: Send keyboard shortcut
-    #     # Send-Keys -Keys "{F5}"
-    #
-    #     Start-Sleep -Seconds 1
-    # }
 
     Write-Log "=== Automation sequence complete ===" "SUCCESS"
 }
