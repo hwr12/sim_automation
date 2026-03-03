@@ -314,35 +314,8 @@ function Run-Automation {
 }
 
 # ============================================================
-# STARTUP REGISTRATION (run once to enable auto-start)
-# ============================================================
-
-function Register-StartupTask {
-    param([string]$TaskName = "SimAutomation")
-
-    $scriptPath = $MyInvocation.ScriptName
-    if (-not $scriptPath) { $scriptPath = $PSCommandPath }
-
-    $action  = New-ScheduledTaskAction -Execute "powershell.exe" `
-        -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$scriptPath`""
-    $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
-    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries `
-        -DontStopIfGoingOnBatteries -StartWhenAvailable
-
-    Register-ScheduledTask -TaskName $TaskName -Action $action `
-        -Trigger $trigger -Settings $settings -Description "Sim Automation Startup" -Force
-
-    Write-Log "Registered startup task: '$TaskName'" "SUCCESS"
-    Write-Host "Task '$TaskName' will run at logon. To remove:" -ForegroundColor Green
-    Write-Host "  Unregister-ScheduledTask -TaskName '$TaskName' -Confirm:`$false" -ForegroundColor Yellow
-}
-
-# ============================================================
 # MAIN
 # ============================================================
-
-# Uncomment the line below ONCE to register as a startup task:
-# Register-StartupTask
 
 # Run the automation
 Run-Automation
